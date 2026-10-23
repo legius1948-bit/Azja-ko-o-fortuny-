@@ -1,0 +1,22 @@
+{
+  "name": "Koło Fortuny Azja",
+  "short_name": "Koło Azja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#071a2e",
+  "theme_color": "#071a2e",
+  "description": "Losuj reprezentacje piłkarskie Azji. Wylosowane drużyny znikają z koła.",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

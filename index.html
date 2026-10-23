@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#071a2e">
+<title>Koło Fortuny Azja</title>
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{--bg:#071a2e;--panel:#102943;--gold:#ffd166;--text:#f4f7fb;--muted:#b8c8d8}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#173c5c 0,#071a2e 60%);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom)}
+main{max-width:620px;margin:auto;padding:20px 0 28px}.head{text-align:center}.badge{display:inline-block;border:1px solid #ffffff30;background:#ffffff0d;border-radius:999px;padding:6px 12px;color:var(--gold);font-size:.78rem;font-weight:800;letter-spacing:.12em}
+h1{font-size:clamp(2rem,8vw,3rem);line-height:1.05;margin:14px 0 8px}p{color:var(--muted);margin:0 0 18px}.stage{position:relative;width:min(92vw,480px);aspect-ratio:1;margin:14px auto 18px;filter:drop-shadow(0 12px 26px #0008)}
+canvas{width:100%;height:100%;display:block}.pointer{position:absolute;top:-7px;left:50%;transform:translateX(-50%);z-index:2;width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-top:38px solid var(--gold);filter:drop-shadow(0 3px 2px #0008)}
+.center{position:absolute;inset:50% auto auto 50%;transform:translate(-50%,-50%);width:19%;aspect-ratio:1;border-radius:50%;border:5px solid #fff;background:#09213a;display:grid;place-items:center;font-size:clamp(1.1rem,5vw,1.8rem);box-shadow:0 0 0 4px #ffd166}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:0;border-radius:15px;padding:15px 12px;font-size:1rem;font-weight:850;cursor:pointer;min-height:52px}.primary{background:var(--gold);color:#142238;grid-column:1/-1;font-size:1.15rem}.secondary{background:#ffffff12;border:1px solid #ffffff25;color:var(--text)}.btn:disabled{opacity:.45}
+.result{margin:16px 0;padding:16px;border:1px solid #ffd16670;background:#ffd16612;border-radius:18px;text-align:center;display:none}.result small{color:var(--gold);font-weight:800;letter-spacing:.12em}.result strong{display:block;font-size:1.6rem;margin-top:5px}
+.stats{display:flex;justify-content:space-between;gap:8px;margin:16px 0;color:var(--muted);font-size:.92rem}.listbox{background:#ffffff09;border:1px solid #ffffff1c;border-radius:16px;padding:14px}.listbox summary{font-weight:800;cursor:pointer}.teams{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.team{border:1px solid #ffffff1e;background:#ffffff0b;border-radius:999px;padding:6px 10px;font-size:.82rem}.foot{text-align:center;color:#8da6bc;font-size:.76rem;margin-top:18px}
+</style>
+</head>
+<body><main>
+<header class="head"><span class="badge">⚽ INTERNATIONAL • ASIA</span><h1>Koło Fortuny<br><span style="color:var(--gold)">AZJA</span></h1><p>Wylosuj reprezentację. Trafione drużyny znikają z koła!</p></header>
+<div class="stage"><div class="pointer"></div><canvas id="wheel" width="900" height="900" aria-label="Koło losowania reprezentacji"></canvas><div class="center">⚽</div></div>
+<div class="actions"><button id="spin" class="btn primary">🎲 LOSUJ REPREZENTACJĘ</button><button id="reset" class="btn secondary">↻ Resetuj koło</button><button id="showList" class="btn secondary">🌏 Lista drużyn</button></div>
+<div id="result" class="result" aria-live="polite"><small>WYLOSOWANO</small><strong id="winner"></strong></div>
+<div class="stats"><span>Pozostało: <b id="remaining">47</b></span><span>Wylosowano: <b id="drawn">0</b></span></div>
+<details class="listbox" id="list"><summary>Reprezentacje w kole</summary><div class="teams" id="teams"></div></details>
+<div class="foot">Koło Fortuny Azja • działa w Safari i może być dodane do ekranu początkowego</div>
+</main>
+<script>
+const initialTeams = [
+["🇦🇫","Afganistan"],["🇦🇺","Australia"],["🇧🇭","Bahrajn"],["🇧🇩","Bangladesz"],["🇧🇹","Bhutan"],["🇧🇳","Brunei"],["🇰🇭","Kambodża"],["🇨🇳","Chiny"],["🇬🇺","Guam"],["🇭🇰","Hongkong"],["🇮🇳","Indie"],["🇮🇩","Indonezja"],["🇮🇶","Irak"],["🇮🇷","Iran"],["🇯🇵","Japonia"],["🇯🇴","Jordania"],["🇰🇿","Kazachstan"],["🇰🇼","Kuwejt"],["🇰🇬","Kirgistan"],["🇱🇦","Laos"],["🇱🇧","Liban"],["🇲🇴","Makau"],["🇲🇾","Malezja"],["🇲🇻","Malediwy"],["🇲🇳","Mongolia"],["🇲🇲","Mjanma"],["🇳🇵","Nepal"],["🇰🇵","Korea Północna"],["🇰🇷","Korea Południowa"],["🇴🇲","Oman"],["🇵🇰","Pakistan"],["🇵🇸","Palestyna"],["🇵🇭","Filipiny"],["🇶🇦","Katar"],["🇸🇦","Arabia Saudyjska"],["🇸🇬","Singapur"],["🇱🇰","Sri Lanka"],["🇸🇾","Syria"],["🇹🇯","Tadżykistan"],["🇹🇭","Tajlandia"],["🇹🇱","Timor Wschodni"],["🇹🇲","Turkmenistan"],["🇦🇪","Zjednoczone Emiraty Arabskie"],["🇺🇿","Uzbekistan"],["🇻🇳","Wietnam"],["🇾🇪","Jemen"],["🇹🇼","Chińskie Tajpej"],["🇲🇵","Mariany Północne"]
+];
+// 49 associations/teams represented, including AFC and associate teams.
+let teams=[...initialTeams], rotation=0, busy=false, lastWinner=null;
+const canvas=document.getElementById('wheel'),ctx=canvas.getContext('2d');
+const colors=['#0d6b85','#e34b4b','#f0a928','#286f58','#6255a5','#cf4779','#2d7fb1','#8d642b'];
+function draw(){
+ const n=teams.length, cx=450,cy=450,r=425;ctx.clearRect(0,0,900,900);
+ if(!n){ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle='#173c5c';ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 38px system-ui';ctx.textAlign='center';ctx.fillText('KONIEC DRUŻYN',cx,cy);return}
+ const slice=2*Math.PI/n;
+ teams.forEach((t,i)=>{const a=rotation+i*slice-Math.PI/2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+slice);ctx.closePath();ctx.fillStyle=colors[i%colors.length];ctx.fill();ctx.strokeStyle='#ffffffb0';ctx.lineWidth=3;ctx.stroke();
+ const mid=a+slice/2;ctx.save();ctx.translate(cx+Math.cos(mid)*r*.69,cy+Math.sin(mid)*r*.69);ctx.rotate(mid+Math.PI/2);ctx.textAlign='center';ctx.textBaseline='middle';
+ const fs=Math.max(10,Math.min(23,240/n));ctx.font=`bold ${fs}px system-ui`;ctx.fillStyle='white';ctx.shadowColor='#0008';ctx.shadowBlur=3;
+ let label=t[1];if(label.length>17)label=label.slice(0,16)+'…';ctx.fillText(t[0],0,-fs*.65);ctx.font=`bold ${Math.max(9,fs*.64)}px system-ui`;ctx.fillText(label,0,fs*.55);ctx.restore()});
+ ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle='#ffd166';ctx.lineWidth=10;ctx.stroke();
+}
+function render(){document.getElementById('remaining').textContent=teams.length;document.getElementById('drawn').textContent=initialTeams.length-teams.length;document.getElementById('spin').disabled=busy||!teams.length;document.getElementById('teams').innerHTML=teams.map(t=>`<span class="team">${t[0]} ${t[1]}</span>`).join('');draw()}
+function spin(){
+ if(busy||!teams.length)return;busy=true;render();document.getElementById('result').style.display='none';
+ const n=teams.length,slice=2*Math.PI/n;const chosen=Math.floor(Math.random()*n);
+ // pointer is at top; make chosen slice center land under pointer.
+ const target=rotation + Math.PI*2*(5+Math.random()*3) - (chosen*slice+slice/2);
+ const start=rotation, delta=target-start, duration=4200, t0=performance.now();
+ function frame(now){let p=Math.min(1,(now-t0)/duration);let eased=1-Math.pow(1-p,4);rotation=start+delta*eased;draw();if(p<1)requestAnimationFrame(frame);else{
+  rotation=((rotation%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
+  // Determine slice at pointer based on final rotation, using the same angular coordinate convention.
+  let idx=Math.floor((((Math.PI*1.5-rotation)%(Math.PI*2)+(Math.PI*2))%(Math.PI*2))/slice);
+  idx=Math.max(0,Math.min(n-1,idx));lastWinner=teams[idx];
+  document.getElementById('winner').textContent=lastWinner[0]+' '+lastWinner[1];document.getElementById('result').style.display='block';
+  teams.splice(idx,1);busy=false;render();
+ }}requestAnimationFrame(frame)
+}
+document.getElementById('spin').addEventListener('click',spin);
+document.getElementById('reset').addEventListener('click',()=>{if(busy)return;teams=[...initialTeams];rotation=0;document.getElementById('result').style.display='none';render()});
+document.getElementById('showList').addEventListener('click',()=>{const d=document.getElementById('list');d.open=!d.open;if(d.open)d.scrollIntoView({behavior:'smooth',block:'nearest'})});
+render();
+if('serviceWorker' in navigator && location.protocol.startsWith('http')) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script></body></html>
